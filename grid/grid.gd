@@ -13,11 +13,12 @@ var traversable
 
 func _ready():
 	var rect = get_used_rect()
-	print("used rect:", rect)
 	# first, make all tiles of type ground
 	for x in rect.size.x:
 		for y in rect.size.y:
-			set_cellv(Vector2(x,y), GROUND)
+			var vec = Vector2(x,y)
+			if get_cellv(vec) != OBSTACLE:
+				set_cellv(vec , GROUND)
 	# then replace value of used tiles with real value
 	for child in get_children():
 		set_cellv(world_to_map(child.position), child.type)
@@ -27,7 +28,10 @@ func _ready():
 	add_traversable_tiles(traversable)
 	connect_traversable_tiles(traversable)
 		
-
+		
+		
+		
+##############################################################################################################
 ### A Star 2D implementation ###
 ##############################################################################################################
 
@@ -117,7 +121,13 @@ func get_astar_path(start, end):
 	# Otherwise, find the map
 	var path_map = astar.get_point_path(start_id, end_id)
 	return path_map
-
+	
+func get_cell_connections(vec2):
+	var id = id_for_point(vec2)
+	return astar.get_point_connections(id)
+	
+	
+########################################################################################################
 ### custom stuff ###
 ########################################################################################################
 
@@ -129,27 +139,14 @@ func update_pawn_position(pawn, cell_start, cell_target):
 	set_cellv(cell_start, EMPTY)
 	return map_to_world(cell_target) + cell_size / 2
 
-func get_cell_connections(vec2):
-	var id = id_for_point(vec2)
-	return astar.get_point_connections(id)
-	
-	
-	
-	
-### unused gdqeust stuff ###
-########################################################################################################
 
-func get_cell_pawn(coordinates):
-	for node in get_children():
-		if world_to_map(node.position) == coordinates:
-			return(node)
-
-func request_move(pawn, vector):
+	
+func request_move_cell(pawn, cell_target):
 	var cell_start = world_to_map(pawn.position)
-	var cell_target = world_to_map(vector)
-	
 	var cell_target_type = get_cellv(cell_target)
 	match cell_target_type:
+		GROUND:
+			return update_pawn_position(pawn, cell_start, cell_target)
 		EMPTY:
 			return update_pawn_position(pawn, cell_start, cell_target)
 		OBJECT:
@@ -159,6 +156,22 @@ func request_move(pawn, vector):
 		ACTOR:
 			var pawn_name = get_cell_pawn(cell_target).name
 			print("Cell %s contains %s" % [cell_target, pawn_name])
+			
+func request_move_vec(pawn, vec):
+	var cell = world_to_map(vec)
+	return request_move_cell(pawn, cell)
+	
+	
+	
+########################################################################################################
+### unused gdquest stuff ###
+########################################################################################################
+
+func get_cell_pawn(coordinates):
+	for node in get_children():
+		if world_to_map(node.position) == coordinates:
+			return(node)
+
 
 func request_move_direction(pawn, direction):
 	var cell_start = world_to_map(pawn.position)

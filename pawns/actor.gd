@@ -1,7 +1,8 @@
 extends "pawn.gd"
 
 onready var Grid = get_parent()
-var path_hl
+onready var CellMenu = get_parent().get_parent().get_parent()\
+	.get_node("UILayer").get_node("CellContextMenu")
 
 signal leftclick_world
 signal rightclick_world
@@ -11,6 +12,7 @@ onready var start_v = Grid.map_to_world(Vector2(2,3))
 
 func _ready():
 	update_look_direction(Vector2(1, 0))
+	CellMenu.connect("move_selected", self, "on_move_selected")
 
 func _process(delta):
 	
@@ -19,26 +21,19 @@ func _process(delta):
 		var mouse_position = get_global_mouse_position()
 		var cell = Grid.world_to_map(mouse_position)
 		print(cell)
-		print(Grid.get_cell_connections(cell))
 		
 	elif Input.is_action_just_pressed("ui_mouse2"):
 		var mouse_position = get_global_mouse_position()
 		var cell = Grid.world_to_map(mouse_position)
 		var cell_type = Grid.cell_type(cell)
 		
-		var my_path = Grid.get_astar_path(Vector2(2,3), cell)
+		
+		var my_path = Grid.get_astar_path(Grid.world_to_map(position), cell)
 		var end_v = Grid.map_to_world(cell)
 		emit_signal("path_update", my_path)
 		
-		
-		
-		emit_signal("rightclick_world", mouse_position, cell_type)
-		
-#		var target_position = Grid.request_move_v(self, mouse_position)
-#		if target_position:
-#			move_to(target_position)
-#		else:
-#			bump()
+		print("rightclick on cell: ", cell, " with type: ", cell_type)
+		emit_signal("rightclick_world", mouse_position, cell, cell_type)
 #
 	
 	var input_direction = get_input_direction()
@@ -52,15 +47,33 @@ func _process(delta):
 	else:
 		bump()
 
+
+
+func update_look_direction(direction):
+	$Pivot/Sprite.rotation = direction.angle()
+
+func on_move_selected(cell):
+	print("move selected received, cell is:", cell)
+	var target_position = Grid.request_move_cell(self, cell)
+	if target_position:
+		move_to(target_position)
+	else:
+		bump()
+
+func on_attack_selected(cell):
+	print("CRITICAL DAMAGE")
+
+
+#########################################################################################
+### Old stuff from GDQuest demo ###
+#########################################################################################
+
 func get_input_direction():
 	return Vector2(
 		int(Input.is_action_pressed("ui_right")) - int(Input.is_action_pressed("ui_left")),
 		int(Input.is_action_pressed("ui_down")) - int(Input.is_action_pressed("ui_up"))
 	)
-
-func update_look_direction(direction):
-	$Pivot/Sprite.rotation = direction.angle()
-
+	
 func move_to(target_position):
 	set_process(false)
 	$AnimationPlayer.play("walk")

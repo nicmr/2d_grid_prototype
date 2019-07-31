@@ -8,10 +8,7 @@ onready var Grid = get_parent().get_node("Grid")
 enum TraversalMode{ X, Y }
 
 func _draw():
-	print("Drawing subpaths:")
-		
 	for path in subpaths:
-		print("Drawing Subpath: ", path)
 		draw_line(Grid.map_to_world(path[0]), Grid.map_to_world(path[1]), Color( 0.37, 0.62, 0.63, 1 ))
 		
 		
@@ -19,7 +16,6 @@ func _ready():
 	player_actor.connect("path_update", self, "on_path_update")
 	
 func on_path_update(path):
-	print("Got path:", path)
 	var subpath_start = path[0]
 	var traversal_mode = TraversalMode.X
 	
