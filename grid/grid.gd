@@ -39,8 +39,8 @@ func _ready():
 func traversable_tiles(tiles):
 	var result = []
 	for tile in tiles:
-#		print("Cell:", tile, " type:", cell_type(tile))
 		if cell_type(tile) == GROUND:
+			print("Cell:", tile, " type:", cell_type(tile))
 			result.append(tile)
 #			print("Adding.")
 	return tiles
@@ -89,8 +89,9 @@ func connect_traversable_tiles(traversable_tiles):
 #					continue
 #				# Connect points
 #				astar.connect_points(id, target_id, true)
-				
-		### Implementation to connect in 8 directions ###
+		# ------------------------------------------------
+		
+		### Implementation to connect in 4 directions ###
 		### (Chess: Rook-style movement) ###
 		
 		# order: above, below, left, right

@@ -4,13 +4,20 @@ var subpaths = []
 
 onready var player_actor = get_parent().get_node("Grid").get_node("Actor")
 onready var Grid = get_parent().get_node("Grid")
+onready var half_cell_size = Grid.get_cell_size()[0]*0.5
 
 enum TraversalMode{ X, Y }
 
 func _draw():
 	for path in subpaths:
-		draw_line(Grid.map_to_world(path[0]), Grid.map_to_world(path[1]), Color( 0.37, 0.62, 0.63, 1 ))
+		var adjusted_start = Grid.map_to_world(path[0])
+		adjusted_start.x += half_cell_size
+		adjusted_start.y += half_cell_size
+		var adjusted_end = Grid.map_to_world(path[1])
+		adjusted_end.x += half_cell_size
+		adjusted_end.y += half_cell_size
 		
+		draw_line(adjusted_start, adjusted_end, Color( 0.8, 0.52, 0.43, 1 ))		
 		
 func _ready():
 	player_actor.connect("path_update", self, "on_path_update")
